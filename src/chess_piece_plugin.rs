@@ -1,6 +1,6 @@
 use std::ops::Add;
 
-use bevy::prelude::*;
+use bevy::{prelude::*, window::PrimaryWindow};
 
 use crate::chess_board_plugin::{SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE};
 
@@ -126,7 +126,7 @@ fn get_chess_entity(
         Transform::from_xyz(
             i as f32 * TILE_SIZE - SCREEN_WIDTH / 2.0 + TILE_SIZE / 2.0,
             j as f32 * TILE_SIZE - SCREEN_HEIGHT / 2.0 + TILE_SIZE / 2.0,
-            2.0,
+            3.0,
         ),
         ChessPiece {
             chess_color: chess_piece_color,
