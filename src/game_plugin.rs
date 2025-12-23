@@ -38,7 +38,7 @@ fn mouse_event(
             for (chess_piece, _) in chess_pieces.iter() {
                 if mouse_x_index == chess_piece.x_index && mouse_y_index == chess_piece.y_index {
                     is_piece = true;
-                    if game_state.chosen_chess_position == None {
+                    if game_state.chosen_chess_position.is_none() {
                         game_state.chosen_chess_position =
                             Some((chess_piece.x_index, chess_piece.y_index));
                         game_state.chosen_piece = Some(*chess_piece);
@@ -58,7 +58,7 @@ fn mouse_event(
                 && is_valid_move(
                     (mouse_x_index, mouse_y_index),
                     &chess_piece,
-                    chess_pieces.iter().map(|(p, _)| &*p).collect(),
+                    chess_pieces.iter().map(|(p, _)| p).collect(),
                 )
             {
                 for (mut chess_piece, mut transform) in chess_pieces.iter_mut() {

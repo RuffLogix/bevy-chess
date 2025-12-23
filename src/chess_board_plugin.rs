@@ -67,7 +67,7 @@ fn draw_valid_move(
     for chess_piece in chess_pieces.iter() {
         if let Some(chose_position) = game_state.chosen_chess_position {
             if chose_position.0 == chess_piece.x_index && chose_position.1 == chess_piece.y_index {
-                valid_cells = get_valid_moves(&chess_piece, chess_pieces.iter().collect());
+                valid_cells = get_valid_moves(chess_piece, chess_pieces.iter().collect());
                 break;
             }
         }
@@ -102,7 +102,7 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
             };
 
             let one_step_y = chess_piece.y_index as i32 + direction;
-            if one_step_y >= 0 && one_step_y < 8 {
+            if (0..8).contains(&one_step_y) {
                 let mut is_occupied = false;
                 for other_piece in chess_pieces.iter() {
                     if other_piece.x_index == chess_piece.x_index
@@ -117,7 +117,7 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
 
                     if chess_piece.is_first_move {
                         let two_step_y = chess_piece.y_index as i32 + 2 * direction;
-                        if two_step_y >= 0 && two_step_y < 8 {
+                        if (0..8).contains(&two_step_y) {
                             let mut is_occupied = false;
                             for other_piece in chess_pieces.iter() {
                                 if other_piece.x_index == chess_piece.x_index
@@ -141,7 +141,7 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
                 loop {
                     let new_x = chess_piece.x_index as i32 + dx * step;
                     let new_y = chess_piece.y_index as i32 + dy * step;
-                    if new_x < 0 || new_x >= 8 || new_y < 0 || new_y >= 8 {
+                    if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
                         break;
                     }
 
@@ -167,7 +167,7 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
             for (dx, dy) in KING_MOVES.iter() {
                 let new_x = chess_piece.x_index as i32 + dx;
                 let new_y = chess_piece.y_index as i32 + dy;
-                if new_x < 0 || new_x >= 8 || new_y < 0 || new_y >= 8 {
+                if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
                     continue;
                 }
 
@@ -187,7 +187,7 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
             for (dx, dy) in KNIGHT_MOVES.iter() {
                 let new_x = chess_piece.x_index as i32 + dx;
                 let new_y = chess_piece.y_index as i32 + dy;
-                if new_x < 0 || new_x >= 8 || new_y < 0 || new_y >= 8 {
+                if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
                     continue;
                 }
 
@@ -209,7 +209,7 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
                 loop {
                     let new_x = chess_piece.x_index as i32 + dx * step;
                     let new_y = chess_piece.y_index as i32 + dy * step;
-                    if new_x < 0 || new_x >= 8 || new_y < 0 || new_y >= 8 {
+                    if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
                         break;
                     }
 
@@ -237,7 +237,7 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
                 loop {
                     let new_x = chess_piece.x_index as i32 + dx * step;
                     let new_y = chess_piece.y_index as i32 + dy * step;
-                    if new_x < 0 || new_x >= 8 || new_y < 0 || new_y >= 8 {
+                    if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
                         break;
                     }
 
@@ -269,8 +269,6 @@ pub fn is_valid_move(
     chess_pieces: Vec<&ChessPiece>,
 ) -> bool {
     let valid_moves = get_valid_moves(chess_piece, chess_pieces);
-    println!("Valid moves: {:?}", valid_moves);
-    println!("Target position: {:?}", target_position);
     for (i, j) in valid_moves.iter() {
         if *i == target_position.0 && *j == target_position.1 {
             return true;
