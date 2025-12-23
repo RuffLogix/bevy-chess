@@ -1,14 +1,47 @@
 use std::ops::Add;
 
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::prelude::*;
 
 use crate::chess_board_plugin::{SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE};
 
 pub struct ChessPiecePlugin;
 
+pub const BISHOP_MOVES: [(i32, i32); 4] = [(1, 1), (1, -1), (-1, 1), (-1, -1)];
+pub const ROOK_MOVES: [(i32, i32); 4] = [(1, 0), (-1, 0), (0, 1), (0, -1)];
+pub const KING_MOVES: [(i32, i32); 8] = [
+    (1, 0),
+    (1, 1),
+    (0, 1),
+    (-1, 1),
+    (-1, 0),
+    (-1, -1),
+    (0, -1),
+    (1, -1),
+];
+pub const KNIGHT_MOVES: [(i32, i32); 8] = [
+    (2, 1),
+    (1, 2),
+    (-1, 2),
+    (-2, 1),
+    (-2, -1),
+    (-1, -2),
+    (1, -2),
+    (2, -1),
+];
+pub const QUEEN_MOVES: [(i32, i32); 8] = [
+    (1, 0),
+    (1, 1),
+    (0, 1),
+    (-1, 1),
+    (-1, 0),
+    (-1, -1),
+    (0, -1),
+    (1, -1),
+];
+
 #[repr(usize)]
-#[derive(Clone, Copy)]
-enum ChessPieceType {
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ChessPieceType {
     Pawn = 0,
     Knight = 1,
     Bishop = 2,
@@ -18,16 +51,19 @@ enum ChessPieceType {
 }
 
 #[repr(usize)]
-#[derive(Clone, Copy)]
-enum ChessPieceColor {
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ChessPieceColor {
     White = 7,  // White pieces start at index 7 in the atlas
     Black = 14, // Black pieces start at index 14 in the atlas
 }
 
-#[derive(Component)]
-struct ChessPiece {
-    chess_color: ChessPieceColor,
-    chess_type: ChessPieceType,
+#[derive(Component, Debug, PartialEq, Eq, Clone, Copy)]
+pub struct ChessPiece {
+    pub x_index: u32,
+    pub y_index: u32,
+    pub chess_color: ChessPieceColor,
+    pub chess_type: ChessPieceType,
+    pub is_first_move: bool,
 }
 
 impl Add<ChessPieceColor> for ChessPieceType {
@@ -129,8 +165,11 @@ fn get_chess_entity(
             3.0,
         ),
         ChessPiece {
+            x_index: i,
+            y_index: j,
             chess_color: chess_piece_color,
             chess_type: chess_piece_type,
+            is_first_move: true,
         },
     )
 }

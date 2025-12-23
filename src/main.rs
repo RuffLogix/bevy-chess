@@ -1,9 +1,11 @@
 mod chess_board_plugin;
 mod chess_piece_plugin;
+mod game_plugin;
 
 use bevy::prelude::*;
 use chess_board_plugin::ChessBoardPlugin;
 use chess_piece_plugin::ChessPiecePlugin;
+use game_plugin::GamePlugin;
 
 fn main() {
     App::new()
@@ -20,6 +22,8 @@ fn main() {
                 })
                 .set(ImagePlugin::default_nearest()),
         )
-        .add_plugins((ChessBoardPlugin, ChessPiecePlugin))
+        .add_plugins(ChessBoardPlugin)
+        .add_plugins(ChessPiecePlugin)
+        .add_plugins(GamePlugin)
         .run();
 }
