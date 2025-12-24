@@ -133,11 +133,27 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
                         }
                     }
                 }
+
+                for dx in [-1, 1].iter() {
+                    let new_x = chess_piece.x_index as i32 + dx;
+                    if !(0..8).contains(&new_x) {
+                        continue;
+                    }
+                    for other_piece in chess_pieces.iter() {
+                        if other_piece.x_index == new_x as u32
+                            && other_piece.y_index == one_step_y as u32
+                            && other_piece.chess_color != chess_piece.chess_color
+                        {
+                            res.push((new_x as u32, one_step_y as u32));
+                        }
+                    }
+                }
             }
         }
         ChessPieceType::Bishop => {
             for (dx, dy) in BISHOP_MOVES.iter() {
                 let mut step = 1;
+                let mut first_opposing_piece_encountered = false;
                 loop {
                     let new_x = chess_piece.x_index as i32 + dx * step;
                     let new_y = chess_piece.y_index as i32 + dy * step;
@@ -150,6 +166,12 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
                         if other_piece.x_index == new_x as u32
                             && other_piece.y_index == new_y as u32
                         {
+                            if other_piece.chess_color != chess_piece.chess_color
+                                && !first_opposing_piece_encountered
+                            {
+                                first_opposing_piece_encountered = true;
+                                res.push((new_x as u32, new_y as u32));
+                            }
                             is_occupied = true;
                             break;
                         }
@@ -174,6 +196,9 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
                 let mut is_occupied = false;
                 for other_piece in chess_pieces.iter() {
                     if other_piece.x_index == new_x as u32 && other_piece.y_index == new_y as u32 {
+                        if other_piece.chess_color != chess_piece.chess_color {
+                            res.push((new_x as u32, new_y as u32));
+                        }
                         is_occupied = true;
                         break;
                     }
@@ -194,6 +219,9 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
                 let mut is_occupied = false;
                 for other_piece in chess_pieces.iter() {
                     if other_piece.x_index == new_x as u32 && other_piece.y_index == new_y as u32 {
+                        if other_piece.chess_color != chess_piece.chess_color {
+                            res.push((new_x as u32, new_y as u32));
+                        }
                         is_occupied = true;
                         break;
                     }
@@ -206,6 +234,7 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
         ChessPieceType::Queen => {
             for (dx, dy) in QUEEN_MOVES.iter() {
                 let mut step = 1;
+                let mut first_opposing_piece_encountered = false;
                 loop {
                     let new_x = chess_piece.x_index as i32 + dx * step;
                     let new_y = chess_piece.y_index as i32 + dy * step;
@@ -218,6 +247,12 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
                         if other_piece.x_index == new_x as u32
                             && other_piece.y_index == new_y as u32
                         {
+                            if other_piece.chess_color != chess_piece.chess_color
+                                && !first_opposing_piece_encountered
+                            {
+                                first_opposing_piece_encountered = true;
+                                res.push((new_x as u32, new_y as u32));
+                            }
                             is_occupied = true;
                             break;
                         }
@@ -234,6 +269,7 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
         ChessPieceType::Rook => {
             for (dx, dy) in ROOK_MOVES.iter() {
                 let mut step = 1;
+                let mut first_opposing_piece_encountered = false;
                 loop {
                     let new_x = chess_piece.x_index as i32 + dx * step;
                     let new_y = chess_piece.y_index as i32 + dy * step;
@@ -246,6 +282,12 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
                         if other_piece.x_index == new_x as u32
                             && other_piece.y_index == new_y as u32
                         {
+                            if other_piece.chess_color != chess_piece.chess_color
+                                && !first_opposing_piece_encountered
+                            {
+                                first_opposing_piece_encountered = true;
+                                res.push((new_x as u32, new_y as u32));
+                            }
                             is_occupied = true;
                             break;
                         }
