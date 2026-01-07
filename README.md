@@ -2,6 +2,8 @@
 
 A simple 2D chess game built with Rust and the Bevy game engine. This project serves as a learning exercise to explore Bevy's Entity-Component-System (ECS) architecture, asset loading, and basic game setup.
 
+![Demo Image](./public/demo_image.png)
+
 ## Features
 
 - **Chess Board**: An 8x8 grid with alternating dark and light tiles, centered on the screen.
