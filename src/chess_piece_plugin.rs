@@ -2,7 +2,7 @@ use std::ops::Add;
 
 use bevy::prelude::*;
 
-use crate::chess_board_plugin::{SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE};
+use crate::chess_board_plugin::{SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE, is_valid_move};
 
 pub struct ChessPiecePlugin;
 
@@ -64,6 +64,7 @@ pub struct ChessPiece {
     pub chess_color: ChessPieceColor,
     pub chess_type: ChessPieceType,
     pub is_first_move: bool,
+    pub just_double_jumped: bool,
 }
 
 impl Add<ChessPieceColor> for ChessPieceType {
@@ -170,6 +171,88 @@ fn get_chess_entity(
             chess_color: chess_piece_color,
             chess_type: chess_piece_type,
             is_first_move: true,
+            just_double_jumped: false,
         },
     )
+}
+
+// Check if the move is a self-check
+// If the move would put the player's own king in check, return true
+pub fn is_self_check(
+    new_position: (u32, u32),
+    chess_piece: &ChessPiece,
+    all_pieces: Vec<&ChessPiece>,
+    current_turn: ChessPieceColor,
+) -> bool {
+    let mut simulated_pieces: Vec<ChessPiece> = all_pieces.iter().map(|p| **p).collect();
+
+    let is_en_passant = chess_piece.chess_type == ChessPieceType::Pawn
+        && chess_piece.x_index != new_position.0
+        && !all_pieces
+            .iter()
+            .any(|p| p.x_index == new_position.0 && p.y_index == new_position.1);
+
+    for piece in simulated_pieces.iter_mut() {
+        if piece.x_index == chess_piece.x_index && piece.y_index == chess_piece.y_index {
+            piece.x_index = new_position.0;
+            piece.y_index = new_position.1;
+        }
+    }
+    simulated_pieces.retain(|p| {
+        if is_en_passant
+            && p.x_index == new_position.0
+            && p.y_index == chess_piece.y_index
+            && p.chess_color != chess_piece.chess_color
+        {
+            return false;
+        }
+
+        !(p.x_index == new_position.0
+            && p.y_index == new_position.1
+            && p.chess_color != chess_piece.chess_color)
+    });
+
+    let king_position = simulated_pieces.iter().find_map(|p| {
+        if p.chess_type == ChessPieceType::King && p.chess_color == current_turn {
+            Some((p.x_index, p.y_index))
+        } else {
+            None
+        }
+    });
+
+    if king_position.is_none() {
+        return false;
+    }
+    let king_position = king_position.unwrap();
+
+    for piece in simulated_pieces.iter() {
+        if piece.chess_color != current_turn {
+            if is_valid_move(king_position, piece, simulated_pieces.iter().collect()) {
+                return true;
+            }
+        }
+    }
+
+    false
+}
+
+pub fn is_checkmate(current_turn: ChessPieceColor, all_pieces: Vec<&ChessPiece>) -> bool {
+    for piece in all_pieces.iter().filter(|p| p.chess_color == current_turn) {
+        for x in 0..8 {
+            for y in 0..8 {
+                let new_position = (x, y);
+                if is_valid_move(new_position, piece, all_pieces.iter().copied().collect()) {
+                    if !is_self_check(
+                        new_position,
+                        piece,
+                        all_pieces.iter().copied().collect(),
+                        current_turn,
+                    ) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    true
 }

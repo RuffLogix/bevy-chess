@@ -14,7 +14,7 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "Chess Game in Bevy".into(),
-                        resolution: (800, 800).into(),
+                        resolution: (1200, 800).into(),
                         resizable: false,
                         ..Default::default()
                     }),

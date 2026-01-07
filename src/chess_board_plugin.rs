@@ -8,7 +8,7 @@ use crate::{
     game_plugin::GameState,
 };
 
-pub const SCREEN_WIDTH: f32 = 800.0;
+pub const SCREEN_WIDTH: f32 = 1200.0;
 pub const SCREEN_HEIGHT: f32 = 800.0;
 pub const TILE_SIZE: f32 = 800.0 / 8.0;
 pub struct ChessBoardPlugin;
@@ -95,212 +95,12 @@ fn get_valid_moves(chess_piece: &ChessPiece, chess_pieces: Vec<&ChessPiece>) -> 
     let mut res: Vec<(u32, u32)> = Vec::from([(chess_piece.x_index, chess_piece.y_index)]);
 
     match chess_piece.chess_type {
-        ChessPieceType::Pawn => {
-            let direction: i32 = match chess_piece.chess_color {
-                ChessPieceColor::White => 1,
-                ChessPieceColor::Black => -1,
-            };
-
-            let one_step_y = chess_piece.y_index as i32 + direction;
-            if (0..8).contains(&one_step_y) {
-                let mut is_occupied = false;
-                for other_piece in chess_pieces.iter() {
-                    if other_piece.x_index == chess_piece.x_index
-                        && other_piece.y_index == one_step_y as u32
-                    {
-                        is_occupied = true;
-                        break;
-                    }
-                }
-                if !is_occupied {
-                    res.push((chess_piece.x_index, one_step_y as u32));
-
-                    if chess_piece.is_first_move {
-                        let two_step_y = chess_piece.y_index as i32 + 2 * direction;
-                        if (0..8).contains(&two_step_y) {
-                            let mut is_occupied = false;
-                            for other_piece in chess_pieces.iter() {
-                                if other_piece.x_index == chess_piece.x_index
-                                    && other_piece.y_index == two_step_y as u32
-                                {
-                                    is_occupied = true;
-                                    break;
-                                }
-                            }
-                            if !is_occupied {
-                                res.push((chess_piece.x_index, two_step_y as u32));
-                            }
-                        }
-                    }
-                }
-
-                for dx in [-1, 1].iter() {
-                    let new_x = chess_piece.x_index as i32 + dx;
-                    if !(0..8).contains(&new_x) {
-                        continue;
-                    }
-                    for other_piece in chess_pieces.iter() {
-                        if other_piece.x_index == new_x as u32
-                            && other_piece.y_index == one_step_y as u32
-                            && other_piece.chess_color != chess_piece.chess_color
-                        {
-                            res.push((new_x as u32, one_step_y as u32));
-                        }
-                    }
-                }
-            }
-        }
-        ChessPieceType::Bishop => {
-            for (dx, dy) in BISHOP_MOVES.iter() {
-                let mut step = 1;
-                let mut first_opposing_piece_encountered = false;
-                loop {
-                    let new_x = chess_piece.x_index as i32 + dx * step;
-                    let new_y = chess_piece.y_index as i32 + dy * step;
-                    if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
-                        break;
-                    }
-
-                    let mut is_occupied = false;
-                    for other_piece in chess_pieces.iter() {
-                        if other_piece.x_index == new_x as u32
-                            && other_piece.y_index == new_y as u32
-                        {
-                            if other_piece.chess_color != chess_piece.chess_color
-                                && !first_opposing_piece_encountered
-                            {
-                                first_opposing_piece_encountered = true;
-                                res.push((new_x as u32, new_y as u32));
-                            }
-                            is_occupied = true;
-                            break;
-                        }
-                    }
-                    if is_occupied {
-                        break;
-                    } else {
-                        res.push((new_x as u32, new_y as u32));
-                    }
-                    step += 1;
-                }
-            }
-        }
-        ChessPieceType::King => {
-            for (dx, dy) in KING_MOVES.iter() {
-                let new_x = chess_piece.x_index as i32 + dx;
-                let new_y = chess_piece.y_index as i32 + dy;
-                if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
-                    continue;
-                }
-
-                let mut is_occupied = false;
-                for other_piece in chess_pieces.iter() {
-                    if other_piece.x_index == new_x as u32 && other_piece.y_index == new_y as u32 {
-                        if other_piece.chess_color != chess_piece.chess_color {
-                            res.push((new_x as u32, new_y as u32));
-                        }
-                        is_occupied = true;
-                        break;
-                    }
-                }
-                if !is_occupied {
-                    res.push((new_x as u32, new_y as u32));
-                }
-            }
-        }
-        ChessPieceType::Knight => {
-            for (dx, dy) in KNIGHT_MOVES.iter() {
-                let new_x = chess_piece.x_index as i32 + dx;
-                let new_y = chess_piece.y_index as i32 + dy;
-                if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
-                    continue;
-                }
-
-                let mut is_occupied = false;
-                for other_piece in chess_pieces.iter() {
-                    if other_piece.x_index == new_x as u32 && other_piece.y_index == new_y as u32 {
-                        if other_piece.chess_color != chess_piece.chess_color {
-                            res.push((new_x as u32, new_y as u32));
-                        }
-                        is_occupied = true;
-                        break;
-                    }
-                }
-                if !is_occupied {
-                    res.push((new_x as u32, new_y as u32));
-                }
-            }
-        }
-        ChessPieceType::Queen => {
-            for (dx, dy) in QUEEN_MOVES.iter() {
-                let mut step = 1;
-                let mut first_opposing_piece_encountered = false;
-                loop {
-                    let new_x = chess_piece.x_index as i32 + dx * step;
-                    let new_y = chess_piece.y_index as i32 + dy * step;
-                    if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
-                        break;
-                    }
-
-                    let mut is_occupied = false;
-                    for other_piece in chess_pieces.iter() {
-                        if other_piece.x_index == new_x as u32
-                            && other_piece.y_index == new_y as u32
-                        {
-                            if other_piece.chess_color != chess_piece.chess_color
-                                && !first_opposing_piece_encountered
-                            {
-                                first_opposing_piece_encountered = true;
-                                res.push((new_x as u32, new_y as u32));
-                            }
-                            is_occupied = true;
-                            break;
-                        }
-                    }
-                    if is_occupied {
-                        break;
-                    } else {
-                        res.push((new_x as u32, new_y as u32));
-                    }
-                    step += 1;
-                }
-            }
-        }
-        ChessPieceType::Rook => {
-            for (dx, dy) in ROOK_MOVES.iter() {
-                let mut step = 1;
-                let mut first_opposing_piece_encountered = false;
-                loop {
-                    let new_x = chess_piece.x_index as i32 + dx * step;
-                    let new_y = chess_piece.y_index as i32 + dy * step;
-                    if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
-                        break;
-                    }
-
-                    let mut is_occupied = false;
-                    for other_piece in chess_pieces.iter() {
-                        if other_piece.x_index == new_x as u32
-                            && other_piece.y_index == new_y as u32
-                        {
-                            if other_piece.chess_color != chess_piece.chess_color
-                                && !first_opposing_piece_encountered
-                            {
-                                first_opposing_piece_encountered = true;
-                                res.push((new_x as u32, new_y as u32));
-                            }
-                            is_occupied = true;
-                            break;
-                        }
-                    }
-                    if is_occupied {
-                        break;
-                    } else {
-                        res.push((new_x as u32, new_y as u32));
-                    }
-                    step += 1;
-                }
-            }
-        }
+        ChessPieceType::Pawn => check_pawn_move(&mut res, chess_piece, chess_pieces),
+        ChessPieceType::Bishop => check_bishop_move(&mut res, chess_piece, chess_pieces),
+        ChessPieceType::King => check_king_move(&mut res, chess_piece, chess_pieces),
+        ChessPieceType::Knight => check_knight_move(&mut res, chess_piece, chess_pieces),
+        ChessPieceType::Queen => check_queen_move(&mut res, chess_piece, chess_pieces),
+        ChessPieceType::Rook => check_rook_move(&mut res, chess_piece, chess_pieces),
     }
     res
 }
@@ -329,6 +129,385 @@ fn get_cell_color(i: u32, j: u32, is_valid_move: bool) -> Color {
         match is_valid_move {
             true => LIGHT_RED_TILE,
             false => LIGHT_TILE,
+        }
+    }
+}
+
+fn check_pawn_move(
+    res: &mut Vec<(u32, u32)>,
+    chess_piece: &ChessPiece,
+    chess_pieces: Vec<&ChessPiece>,
+) {
+    let direction: i32 = match chess_piece.chess_color {
+        ChessPieceColor::White => 1,
+        ChessPieceColor::Black => -1,
+    };
+
+    let one_step_y = chess_piece.y_index as i32 + direction;
+    if (0..8).contains(&one_step_y) {
+        let mut is_occupied = false;
+        for other_piece in chess_pieces.iter() {
+            if other_piece.x_index == chess_piece.x_index
+                && other_piece.y_index == one_step_y as u32
+            {
+                is_occupied = true;
+                break;
+            }
+        }
+        if !is_occupied {
+            res.push((chess_piece.x_index, one_step_y as u32));
+
+            if chess_piece.is_first_move {
+                let two_step_y = chess_piece.y_index as i32 + 2 * direction;
+                if (0..8).contains(&two_step_y) {
+                    let mut is_occupied = false;
+                    for other_piece in chess_pieces.iter() {
+                        if other_piece.x_index == chess_piece.x_index
+                            && other_piece.y_index == two_step_y as u32
+                        {
+                            is_occupied = true;
+                            break;
+                        }
+                    }
+                    if !is_occupied {
+                        res.push((chess_piece.x_index, two_step_y as u32));
+                    }
+                }
+            }
+        }
+
+        for dx in [-1, 1].iter() {
+            let new_x = chess_piece.x_index as i32 + dx;
+            if !(0..8).contains(&new_x) {
+                continue;
+            }
+            for other_piece in chess_pieces.iter() {
+                if other_piece.x_index == new_x as u32
+                    && other_piece.y_index == one_step_y as u32
+                    && other_piece.chess_color != chess_piece.chess_color
+                {
+                    res.push((new_x as u32, one_step_y as u32));
+                }
+            }
+        }
+
+        // En Passant
+        for dx in [-1, 1].iter() {
+            let adj_x = chess_piece.x_index as i32 + dx;
+            if !(0..8).contains(&adj_x) {
+                continue;
+            }
+
+            for other_piece in chess_pieces.iter() {
+                if other_piece.x_index == adj_x as u32
+                    && other_piece.y_index == chess_piece.y_index
+                    && other_piece.chess_color != chess_piece.chess_color
+                    && other_piece.chess_type == ChessPieceType::Pawn
+                    && other_piece.just_double_jumped
+                {
+                    res.push((adj_x as u32, one_step_y as u32));
+                }
+            }
+        }
+    }
+}
+
+fn check_bishop_move(
+    res: &mut Vec<(u32, u32)>,
+    chess_piece: &ChessPiece,
+    chess_pieces: Vec<&ChessPiece>,
+) {
+    for (dx, dy) in BISHOP_MOVES.iter() {
+        let mut step = 1;
+        let mut first_opposing_piece_encountered = false;
+        loop {
+            let new_x = chess_piece.x_index as i32 + dx * step;
+            let new_y = chess_piece.y_index as i32 + dy * step;
+            if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
+                break;
+            }
+
+            let mut is_occupied = false;
+            for other_piece in chess_pieces.iter() {
+                if other_piece.x_index == new_x as u32 && other_piece.y_index == new_y as u32 {
+                    if other_piece.chess_color != chess_piece.chess_color
+                        && !first_opposing_piece_encountered
+                    {
+                        first_opposing_piece_encountered = true;
+                        res.push((new_x as u32, new_y as u32));
+                    }
+                    is_occupied = true;
+                    break;
+                }
+            }
+            if is_occupied {
+                break;
+            } else {
+                res.push((new_x as u32, new_y as u32));
+            }
+            step += 1;
+        }
+    }
+}
+
+fn check_king_move(
+    res: &mut Vec<(u32, u32)>,
+    chess_piece: &ChessPiece,
+    chess_pieces: Vec<&ChessPiece>,
+) {
+    // Normal King Moves
+    for (dx, dy) in KING_MOVES.iter() {
+        let new_x = chess_piece.x_index as i32 + dx;
+        let new_y = chess_piece.y_index as i32 + dy;
+        if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
+            continue;
+        }
+
+        let mut is_occupied = false;
+        for other_piece in chess_pieces.iter() {
+            if other_piece.x_index == new_x as u32 && other_piece.y_index == new_y as u32 {
+                if other_piece.chess_color != chess_piece.chess_color {
+                    res.push((new_x as u32, new_y as u32));
+                }
+                is_occupied = true;
+                break;
+            }
+        }
+        if !is_occupied {
+            res.push((new_x as u32, new_y as u32));
+        }
+    }
+
+    // Castling Logic
+    if chess_piece.is_first_move {
+        let (rank, opponent_color) = match chess_piece.chess_color {
+            ChessPieceColor::White => (0, ChessPieceColor::Black),
+            ChessPieceColor::Black => (7, ChessPieceColor::White),
+        };
+
+        // Cannot castle if King is currently in check
+        if is_square_under_attack(
+            (chess_piece.x_index, chess_piece.y_index),
+            &chess_pieces,
+            opponent_color,
+        ) {
+            return;
+        }
+
+        // Kingside Castling
+        // King moves to (6, rank). Rook at (7, rank). Empty (5, rank), (6, rank).
+        // Transit square (5, rank) and destination (6, rank) must not be attacked.
+        if check_castling_path(
+            chess_piece,
+            &chess_pieces,
+            rank,
+            opponent_color,
+            7,       // rook x
+            &[5, 6], // empty squares
+            &[5, 6], // safe squares
+        ) {
+            res.push((6, rank));
+        }
+
+        // Queenside Castling
+        // King moves to (2, rank). Rook at (0, rank). Empty (1, rank), (2, rank), (3, rank).
+        // Transit square (3, rank) and destination (2, rank) must not be attacked.
+        if check_castling_path(
+            chess_piece,
+            &chess_pieces,
+            rank,
+            opponent_color,
+            0,          // rook x
+            &[1, 2, 3], // empty squares
+            &[2, 3],    // safe squares
+        ) {
+            res.push((2, rank));
+        }
+    }
+}
+
+fn check_castling_path(
+    king: &ChessPiece,
+    all_pieces: &Vec<&ChessPiece>,
+    rank: u32,
+    opponent_color: ChessPieceColor,
+    rook_x: u32,
+    empty_xs: &[u32],
+    safe_xs: &[u32],
+) -> bool {
+    // 1. Check Rook existence and first move
+    let rook_exists = all_pieces.iter().any(|p| {
+        p.x_index == rook_x
+            && p.y_index == rank
+            && p.chess_type == ChessPieceType::Rook
+            && p.chess_color == king.chess_color
+            && p.is_first_move
+    });
+
+    if !rook_exists {
+        return false;
+    }
+
+    // 2. Check empty squares
+    for &x in empty_xs {
+        if all_pieces
+            .iter()
+            .any(|p| p.x_index == x && p.y_index == rank)
+        {
+            return false;
+        }
+    }
+
+    // 3. Check safe squares (not attacked)
+    for &x in safe_xs {
+        if is_square_under_attack((x, rank), all_pieces, opponent_color) {
+            return false;
+        }
+    }
+
+    true
+}
+
+fn is_square_under_attack(
+    position: (u32, u32),
+    chess_pieces: &Vec<&ChessPiece>,
+    opponent_color: ChessPieceColor,
+) -> bool {
+    for piece in chess_pieces {
+        if piece.chess_color == opponent_color {
+            match piece.chess_type {
+                ChessPieceType::Pawn => {
+                    let direction = match piece.chess_color {
+                        ChessPieceColor::White => 1,
+                        ChessPieceColor::Black => -1,
+                    };
+                    let attack_y = piece.y_index as i32 + direction;
+                    if attack_y == position.1 as i32 {
+                        if (piece.x_index as i32 - position.0 as i32).abs() == 1 {
+                            return true;
+                        }
+                    }
+                }
+                ChessPieceType::King => {
+                    let dx = (piece.x_index as i32 - position.0 as i32).abs();
+                    let dy = (piece.y_index as i32 - position.1 as i32).abs();
+                    if dx <= 1 && dy <= 1 {
+                        return true;
+                    }
+                }
+                _ => {
+                    // For other pieces, use standard move validation
+                    // We must avoid recursion by not calling is_valid_move for King type (handled above)
+                    if is_valid_move(position, piece, chess_pieces.clone()) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    false
+}
+
+fn check_knight_move(
+    res: &mut Vec<(u32, u32)>,
+    chess_piece: &ChessPiece,
+    chess_pieces: Vec<&ChessPiece>,
+) {
+    for (dx, dy) in KNIGHT_MOVES.iter() {
+        let new_x = chess_piece.x_index as i32 + dx;
+        let new_y = chess_piece.y_index as i32 + dy;
+        if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
+            continue;
+        }
+
+        let mut is_occupied = false;
+        for other_piece in chess_pieces.iter() {
+            if other_piece.x_index == new_x as u32 && other_piece.y_index == new_y as u32 {
+                if other_piece.chess_color != chess_piece.chess_color {
+                    res.push((new_x as u32, new_y as u32));
+                }
+                is_occupied = true;
+                break;
+            }
+        }
+        if !is_occupied {
+            res.push((new_x as u32, new_y as u32));
+        }
+    }
+}
+
+fn check_queen_move(
+    res: &mut Vec<(u32, u32)>,
+    chess_piece: &ChessPiece,
+    chess_pieces: Vec<&ChessPiece>,
+) {
+    for (dx, dy) in QUEEN_MOVES.iter() {
+        let mut step = 1;
+        let mut first_opposing_piece_encountered = false;
+        loop {
+            let new_x = chess_piece.x_index as i32 + dx * step;
+            let new_y = chess_piece.y_index as i32 + dy * step;
+            if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
+                break;
+            }
+
+            let mut is_occupied = false;
+            for other_piece in chess_pieces.iter() {
+                if other_piece.x_index == new_x as u32 && other_piece.y_index == new_y as u32 {
+                    if other_piece.chess_color != chess_piece.chess_color
+                        && !first_opposing_piece_encountered
+                    {
+                        first_opposing_piece_encountered = true;
+                        res.push((new_x as u32, new_y as u32));
+                    }
+                    is_occupied = true;
+                    break;
+                }
+            }
+            if is_occupied {
+                break;
+            } else {
+                res.push((new_x as u32, new_y as u32));
+            }
+            step += 1;
+        }
+    }
+}
+
+fn check_rook_move(
+    res: &mut Vec<(u32, u32)>,
+    chess_piece: &ChessPiece,
+    chess_pieces: Vec<&ChessPiece>,
+) {
+    for (dx, dy) in ROOK_MOVES.iter() {
+        let mut step = 1;
+        let mut first_opposing_piece_encountered = false;
+        loop {
+            let new_x = chess_piece.x_index as i32 + dx * step;
+            let new_y = chess_piece.y_index as i32 + dy * step;
+            if !(0..8).contains(&new_x) || !(0..8).contains(&new_y) {
+                break;
+            }
+
+            let mut is_occupied = false;
+            for other_piece in chess_pieces.iter() {
+                if other_piece.x_index == new_x as u32 && other_piece.y_index == new_y as u32 {
+                    if other_piece.chess_color != chess_piece.chess_color
+                        && !first_opposing_piece_encountered
+                    {
+                        first_opposing_piece_encountered = true;
+                        res.push((new_x as u32, new_y as u32));
+                    }
+                    is_occupied = true;
+                    break;
+                }
+            }
+            if is_occupied {
+                break;
+            } else {
+                res.push((new_x as u32, new_y as u32));
+            }
+            step += 1;
         }
     }
 }
