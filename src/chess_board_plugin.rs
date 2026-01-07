@@ -382,10 +382,10 @@ fn is_square_under_attack(
                         ChessPieceColor::Black => -1,
                     };
                     let attack_y = piece.y_index as i32 + direction;
-                    if attack_y == position.1 as i32 {
-                        if (piece.x_index as i32 - position.0 as i32).abs() == 1 {
-                            return true;
-                        }
+                    if attack_y == position.1 as i32
+                        && (piece.x_index as i32 - position.0 as i32).abs() == 1
+                    {
+                        return true;
                     }
                 }
                 ChessPieceType::King => {

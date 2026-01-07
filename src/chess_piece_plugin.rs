@@ -226,10 +226,10 @@ pub fn is_self_check(
     let king_position = king_position.unwrap();
 
     for piece in simulated_pieces.iter() {
-        if piece.chess_color != current_turn {
-            if is_valid_move(king_position, piece, simulated_pieces.iter().collect()) {
-                return true;
-            }
+        if piece.chess_color != current_turn
+            && is_valid_move(king_position, piece, simulated_pieces.iter().collect())
+        {
+            return true;
         }
     }
 
@@ -241,15 +241,10 @@ pub fn is_checkmate(current_turn: ChessPieceColor, all_pieces: Vec<&ChessPiece>)
         for x in 0..8 {
             for y in 0..8 {
                 let new_position = (x, y);
-                if is_valid_move(new_position, piece, all_pieces.iter().copied().collect()) {
-                    if !is_self_check(
-                        new_position,
-                        piece,
-                        all_pieces.iter().copied().collect(),
-                        current_turn,
-                    ) {
-                        return false;
-                    }
+                if is_valid_move(new_position, piece, all_pieces.to_vec())
+                    && !is_self_check(new_position, piece, all_pieces.to_vec(), current_turn)
+                {
+                    return false;
                 }
             }
         }

@@ -285,7 +285,7 @@ fn check_game_status(
     game_state: &mut GameState,
     chess_pieces: &Query<(Entity, &mut ChessPiece, &mut Transform, &mut Sprite)>,
 ) {
-    let pieces_vec: Vec<&ChessPiece> = chess_pieces.iter().map(|(_, p, _, _)| &*p).collect();
+    let pieces_vec: Vec<&ChessPiece> = chess_pieces.iter().map(|(_, p, _, _)| p).collect();
 
     if is_checkmate(game_state.current_turn, pieces_vec.clone()) {
         if let Some(piece) = pieces_vec
@@ -302,7 +302,7 @@ fn check_game_status(
                     ChessPieceColor::White => ChessPieceColor::Black,
                     ChessPieceColor::Black => ChessPieceColor::White,
                 };
-                game_state.status = format!("Checkmate! {:?} wins.", winner);
+                game_state.status = format!("Checkmate! {winner:?} wins.");
                 println!("{}", game_state.status);
             } else {
                 game_state.status = "Stalemate!".to_string();
@@ -373,7 +373,7 @@ fn record_move(game_state: &mut GameState, piece: &ChessPiece, to: (u32, u32)) {
         ChessPieceColor::Black => "B",
     };
 
-    let move_str = format!("{}: {} {} -> {}", color_prefix, piece_str, from_str, to_str);
+    let move_str = format!("{color_prefix}: {piece_str} {from_str} -> {to_str}");
 
     game_state.move_history.push(move_str);
 }
@@ -381,5 +381,5 @@ fn record_move(game_state: &mut GameState, piece: &ChessPiece, to: (u32, u32)) {
 fn get_chess_notation(x: u32, y: u32) -> String {
     let file = (b'a' + x as u8) as char;
     let rank = y + 1;
-    format!("{}{}", file, rank)
+    format!("{file}{rank}")
 }
