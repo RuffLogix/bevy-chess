@@ -1,6 +1,10 @@
 mod chess_board_plugin;
 mod chess_piece_plugin;
+mod components;
+mod events;
 mod game_plugin;
+mod resources;
+mod rules;
 
 use bevy::prelude::*;
 use chess_board_plugin::ChessBoardPlugin;
